@@ -1,0 +1,87 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/camera_rig.gd" id="2_rig"]
+[ext_resource type="Script" path="res://scripts/spawner.gd" id="3_spawner"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+ground_bottom_color = Color(0.2, 0.2, 0.2, 1)
+sky_horizon_color = Color(0.65, 0.7, 0.78, 1)
+ground_horizon_color = Color(0.65, 0.7, 0.78, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+tonemap_mode = 2
+
+[sub_resource type="PlaneMesh" id="ground_mesh"]
+size = Vector2(100, 100)
+
+[sub_resource type="StandardMaterial3D" id="ground_mat"]
+albedo_color = Color(0.45, 0.5, 0.42, 1)
+roughness = 1.0
+
+[sub_resource type="BoxShape3D" id="ground_shape"]
+size = Vector3(100, 1, 100)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+position = Vector3(0, 20, 0)
+rotation = Vector3(-0.9, 0.6, 0)
+light_energy = 1.3
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="Mesh" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("ground_mesh")
+surface_material_override/0 = SubResource("ground_mat")
+
+[node name="Collision" type="CollisionShape3D" parent="Ground"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("ground_shape")
+
+[node name="CameraRig" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9, 12)
+script = ExtResource("2_rig")
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+rotation = Vector3(-0.55, 0, 0)
+script = ExtResource("3_spawner")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Controls" type="Label" parent="HUD"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 720.0
+offset_bottom = 150.0
+theme_override_font_sizes/font_size = 15
+text = "1 / 2 / 3 - select: Box / Sphere / Cylinder
+Left click - place shape
++ / - - grow / shrink
+R - rotate 45 deg
+X - delete shape under crosshair
+
+WASD - fly   Q / E - down / up   Shift - fast
+Right drag - orbit   Wheel - zoom"
+
+[node name="Status" type="Label" parent="HUD"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -40.0
+offset_right = -16.0
+offset_bottom = -16.0
+theme_override_font_sizes/font_size = 17
+text = "Shape: Box  |  Size: 1.00  |  Rot: 0 deg  |  Placed: 0"
