@@ -43,7 +43,7 @@ func _ready() -> void:
 	_ghost.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_ghost)
 
-	_build_ghost_mesh.call_deferred()
+	_build_ghost_mesh()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -73,6 +73,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				_place_shape()
 
 func _physics_process(_delta: float) -> void:
+	if _ghost.mesh == null:
+		_ghost.visible = false
+		return
 	var hit := _raycast()
 	if hit.is_empty():
 		_ghost.visible = false
