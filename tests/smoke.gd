@@ -14,18 +14,18 @@ func _run() -> void:
 	for i in 5:
 		await physics_frame
 
-	var spawner: Camera3D = scene.get_node("Player/Camera3D")
-	var main_script_ok := scene.get_script() != null
-	if not main_script_ok:
+	var spawner: Camera3D = scene.get_node("CameraRig/Camera3D")
+	if scene.get_script() == null:
 		errors.append("Main scene script missing")
-
 	if spawner == null:
 		errors.append("Spawner camera not found")
 		_fail(errors)
-
-	spawner.rotate_x(-0.6)
-	for i in 5:
-		await physics_frame
+	var rig: Node3D = scene.get_node("CameraRig")
+	if rig == null:
+		errors.append("Camera rig not found")
+		_fail(errors)
+	if not is_instance_valid(rig) or rig.get_script() == null:
+		errors.append("Camera rig script missing")
 
 	if not spawner._ghost.visible:
 		errors.append("Ghost did not become visible after raycast (expected ground hit)")
@@ -35,8 +35,8 @@ func _run() -> void:
 	var placed := get_nodes_in_group("placeable")
 	if placed.size() != 1:
 		errors.append("Expected 1 placed shape, got %d" % placed.size())
-	var shape: Node = placed[0] if placed.size() == 1 else null
-	if shape != null:
+	if placed.size() == 1:
+		var shape: Node = placed[0]
 		if shape.get_child_count() < 2:
 			errors.append("Placed shape is missing mesh or collider child")
 		if shape.get_child(0).mesh == null:
@@ -61,6 +61,26 @@ func _run() -> void:
 	if get_nodes_in_group("placeable").size() != 2:
 		errors.append("Cylinder placement failed, placed=%d" % get_nodes_in_group("placeable").size())
 
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_RIGHT
+	press.pressed = true
+	Input.parse_input_event(press)
+	var drag := InputEventMouseMotion.new()
+	drag.relative = Vector2(100, 30)
+	Input.parse_input_event(drag)
+	await process_frame
+	await process_frame
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_RIGHT
+	release.pressed = false
+	Input.parse_input_event(release)
+	if rig.rotation.y >= 0.0 or rig.get_node("Camera3D").rotation.x >= -0.55:
+		errors.append("Right-drag orbit did not move the camera")
+
+	rig.rotation.y = 0.0
+	rig.get_node("Camera3D").rotation.x = -0.55
+	for i in 2:
+		await physics_frame
 	spawner._delete_shape_under_crosshair()
 	await physics_frame
 	await physics_frame

@@ -20,7 +20,7 @@ const MIN_SIZE := 0.2
 const MAX_SIZE := 5.0
 const SCALE_STEP := 1.1
 const ROTATION_STEP := PI / 4.0
-const RAY_LENGTH := 100.0
+const RAY_LENGTH := 200.0
 
 var current_shape: ShapeType = ShapeType.BOX
 var shape_size := 1.0
@@ -57,20 +57,20 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_R:
 				rotation_y += ROTATION_STEP
 				_update_status()
-	elif event is InputEventMouseButton and event.pressed:
-		match event.button_index:
-			MOUSE_BUTTON_WHEEL_UP:
+			KEY_EQUAL:
 				shape_size = clampf(shape_size * SCALE_STEP, MIN_SIZE, MAX_SIZE)
 				_build_ghost_mesh()
 				_update_status()
-			MOUSE_BUTTON_WHEEL_DOWN:
+			KEY_MINUS:
 				shape_size = clampf(shape_size / SCALE_STEP, MIN_SIZE, MAX_SIZE)
 				_build_ghost_mesh()
 				_update_status()
+			KEY_X:
+				_delete_shape_under_crosshair()
+	elif event is InputEventMouseButton and event.pressed:
+		match event.button_index:
 			MOUSE_BUTTON_LEFT:
 				_place_shape()
-			MOUSE_BUTTON_RIGHT:
-				_delete_shape_under_crosshair()
 
 func _physics_process(_delta: float) -> void:
 	var hit := _raycast()
@@ -94,9 +94,6 @@ func _raycast() -> Dictionary:
 	var from := global_position
 	var to := from - global_transform.basis.z * RAY_LENGTH
 	var query := PhysicsRayQueryParameters3D.create(from, to)
-	var player := get_parent()
-	if player is CollisionObject3D:
-		query.exclude = [player.get_rid()]
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
 func _build_ghost_mesh() -> void:

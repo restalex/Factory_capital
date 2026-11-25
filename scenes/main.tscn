@@ -1,7 +1,8 @@
 [gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://scripts/camera_rig.gd" id="2_rig"]
+[ext_resource type="Script" path="res://scripts/spawner.gd" id="3_spawner"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
 ground_bottom_color = Color(0.2, 0.2, 0.2, 1)
@@ -49,8 +50,13 @@ surface_material_override/0 = SubResource("ground_mat")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("ground_shape")
 
-[node name="Player" parent="." instance=ExtResource("2_player")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 5)
+[node name="CameraRig" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9, 12)
+script = ExtResource("2_rig")
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+rotation = Vector3(-0.55, 0, 0)
+script = ExtResource("3_spawner")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
@@ -62,12 +68,12 @@ offset_bottom = 150.0
 theme_override_font_sizes/font_size = 15
 text = "1 / 2 / 3 - select: Box / Sphere / Cylinder
 Left click - place shape
-Mouse wheel - grow / shrink
++ / - - grow / shrink
 R - rotate 45 deg
-Right click - delete shape under crosshair
+X - delete shape under crosshair
 
-WASD - move   Shift - sprint   Space - jump
-Mouse - look   Esc - release / capture cursor"
+WASD - fly   Q / E - down / up   Shift - fast
+Right drag - orbit   Wheel - zoom"
 
 [node name="Status" type="Label" parent="HUD"]
 anchor_top = 1.0
